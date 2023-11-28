@@ -8,11 +8,11 @@ export type SchemaStyles = {
 };
 
 export class DevLogger {
+    private schemaStyles?: SchemaStyles;
+
     private preferScheme?: LightScheme;
 
-    private schemaStyles: SchemaStyles;
-
-    constructor(schemaStyles: SchemaStyles, preferScheme?: LightScheme) {
+    constructor(schemaStyles?: SchemaStyles, preferScheme?: LightScheme) {
         this.schemaStyles = schemaStyles;
         this.preferScheme = preferScheme;
     }
@@ -31,7 +31,7 @@ export class DevLogger {
     }
 
     private getStylesForLog(str: string, lightSchema: LightScheme): string {
-        return this.schemaStyles[str][lightSchema] || 'color: black; font-weight: bold;';
+        return this.schemaStyles ? this.schemaStyles[str][lightSchema] || 'color: black; font-weight: bold;' : '';
     }
 
     private logColored(data: unknown[], logger: LoggerMethod): void {
@@ -72,6 +72,6 @@ export class DevLogger {
     }
 
     debug(...data: unknown[]): void {
-        this.logColored(data, debug);
+        this.schemaStyles ? this.logColored(data, debug) : debug(...data);
     }
 }
