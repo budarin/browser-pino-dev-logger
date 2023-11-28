@@ -30,3 +30,6 @@ logger.debug('[APP]', 'Hello world!'); // [APP] Hello world! in browsers light s
 const darkLogger = new DevLogger(schemasStyles, 'dark');
 darkLogger.debug('[APP]', 'Hello world!'); // [APP] Hello world! in dark scheme
 ```
+
+It looks like this
+![Devtools console](log.png)
