@@ -1,6 +1,7 @@
 # dev-logger
 
 Version of the service log for development mode.
+Allows you to have a color division of logs for `logger.debug`
 
 ## Installation
 
@@ -26,9 +27,11 @@ const schemasStyles: SchemaStyles = {
 const logger = new DevLogger(schemasStyles);
 logger.debug('[APP]', 'Hello world!'); // [APP] Hello world! in browsers light scheme (light or dark)
 
-
 const darkLogger = new DevLogger(schemasStyles, 'dark');
 darkLogger.debug('[APP]', 'Hello world!'); // [APP] Hello world! in dark scheme
+
+const ordinaryLogger = new DevLogger();
+ordinaryLogger.debug('[APP]', 'Hello world!'); // [APP] Hello world! in usual not colored output
 ```
 
 It looks like this
