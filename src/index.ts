@@ -68,7 +68,7 @@ export class DevLogger {
 
     // eslint-disable-next-line class-methods-use-this
     info(...data: unknown[]): void {
-        log(...data);
+        this.logColored(data, debug);
     }
 
     debug(...data: unknown[]): void {
