@@ -32,5 +32,8 @@
         "prepublish": "npm run build",
         "npm-publish": "npm run build && npm publish",
         "upgrade deps": "yarn upgrade-interactive --latest;"
+    },
+    "dependencies": {
+        "pino": "^8.16.2"
     }
 }
