@@ -1,5 +1,6 @@
 import { pino, Level, LogEvent } from 'pino';
 
+const DEBUG = 'debug';
 const noop = (): void => {};
 
 interface LoggerService {
@@ -101,7 +102,7 @@ export class PinoDevLogger implements LoggerService {
                     serialize: false,
                     asObject: false,
                     transmit: {
-                        level: 'debug',
+                        level: DEBUG,
                         send: (level: Level, logEvent: LogEvent): void => {
                             const pinoInstanceLevel = pino.levels.values[this.pinoInstance.level];
 
@@ -120,6 +121,8 @@ export class PinoDevLogger implements LoggerService {
                     write: noop,
                 },
             }).child(bindings);
+
+        (this.pinoInstance as pino.Logger).level = DEBUG;
     }
 
     info(...data: unknown[]): void {
