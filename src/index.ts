@@ -1,77 +1,148 @@
-const { log, warn, error, debug } = console;
+import { pino, Level, LogEvent } from 'pino';
 
-type LoggerMethod = (...data: unknown[]) => void;
+const noop = (): void => {};
 
-export type LightScheme = 'light' | 'dark';
-export type SchemaStyles = {
-    [key: string]: { light: string; dark: string };
+interface LoggerService {
+    info: (...data: unknown[]) => void;
+    warn: (...data: unknown[]) => void;
+    error: (...data: unknown[]) => void;
+    debug: (...data: unknown[]) => void;
+    child: (binding: Record<string, string>) => LoggerService;
+}
+
+export type LightSchemeType = 'light' | 'dark';
+export type LightScheme = {
+    [key: string]: {
+        light: string;
+        dark: string;
+    };
 };
 
-export class DevLogger {
-    private schemaStyles?: SchemaStyles;
+function getLightScheme(defaultScheme: string = 'light'): LightSchemeType {
+    const darkMode =
+        'matchMedia' in globalThis ? globalThis.matchMedia('(prefers-color-scheme: dark)').matches : defaultScheme;
+    return darkMode ? 'dark' : 'light';
+}
 
-    private preferScheme?: LightScheme;
+function getFormatedBindings(
+    colorSchema: LightScheme,
+    defaultLightSchema: LightSchemeType | undefined,
+    bindings: pino.Bindings[],
+): string[] {
+    const lightScheme = getLightScheme(defaultLightSchema);
 
-    constructor(schemaStyles?: SchemaStyles, preferScheme?: LightScheme) {
-        this.schemaStyles = schemaStyles;
-        this.preferScheme = preferScheme;
-    }
+    const bindingMessages =
+        bindings.length > 0
+            ? bindings
+                  .map((b) => Object.values(b))
+                  .flat()
+                  .map((b) => `%c${b}`)
+                  .join('')
+            : '';
+    const bindingStyles =
+        bindings.length > 0
+            ? bindings
+                  .map((b) => Object.values(b))
+                  .flat()
+                  .map(
+                      (b) =>
+                          `color: ${
+                              colorSchema[b]?.[defaultLightSchema || lightScheme] || 'black'
+                          }; font-weight: bold;`,
+                  )
+            : '';
 
-    private getLightScheme(): LightScheme {
-        if (this.preferScheme) {
-            return this.preferScheme;
+    return [bindingMessages, ...bindingStyles].filter(Boolean);
+}
+
+const { info, warn, error, debug } = console;
+
+const logFunctions = {
+    debug,
+    info,
+    warn,
+    error,
+};
+
+type LogFunctions = typeof logFunctions;
+type KeyOfLogFunctions = keyof LogFunctions;
+
+function logMessage(level: string, binds: string[], messages: string[]): void {
+    const logFunction = logFunctions[level as KeyOfLogFunctions];
+
+    if (logFunction) {
+        if (binds.length > 0) {
+            logFunction(...binds, ...messages);
+        } else {
+            logFunction(...messages);
         }
+    }
+}
+export class PinoDevLogger implements LoggerService {
+    private pinoInstance: pino.Logger;
 
-        if (!('matchMedia' in globalThis)) {
-            return 'light';
-        }
+    private colorSchema: LightScheme;
 
-        const darkMode = globalThis.matchMedia('(prefers-color-scheme: dark)').matches;
-        return darkMode ? 'dark' : 'light';
+    private defaultLightSchema: LightSchemeType | undefined;
+
+    constructor(
+        bindings: Record<string, string> = {},
+        colorSchema: LightScheme = {},
+        defaultLightSchema: LightSchemeType | undefined = undefined,
+        pinoInstance: pino.Logger | undefined = undefined,
+    ) {
+        this.colorSchema = colorSchema;
+        this.defaultLightSchema = defaultLightSchema;
+
+        this.pinoInstance =
+            pinoInstance ||
+            pino({
+                formatters: {
+                    level: (label) => ({ level: label.toUpperCase() }),
+                },
+                browser: {
+                    serialize: false,
+                    asObject: false,
+                    transmit: {
+                        send: (level: Level, logEvent: LogEvent): void => {
+                            const pinoInstanceLevel = pino.levels.values[this.pinoInstance.level];
+
+                            if (pino.levels.values[level] >= pinoInstanceLevel) {
+                                const messages = logEvent.messages.flat();
+                                const binds = getFormatedBindings(
+                                    this.colorSchema,
+                                    this.defaultLightSchema,
+                                    logEvent.bindings,
+                                );
+
+                                logMessage(level, binds, messages);
+                            }
+                        },
+                    },
+                    write: noop,
+                },
+            }).child(bindings);
     }
 
-    private getStylesForLog(str: string, lightSchema: LightScheme): string {
-        return this.schemaStyles ? this.schemaStyles[str][lightSchema] || 'color: black; font-weight: bold;' : '';
-    }
-
-    private logColored(data: unknown[], logger: LoggerMethod): void {
-        const [str, ...rest] = data;
-        const lightSchema = this.getLightScheme();
-
-        if (typeof str === 'string') {
-            const match = str.match(/(\[\s*.*?\s*\])\s*(.*)$/);
-
-            if (match && match[1]) {
-                const styles = this.getStylesForLog(match[1], lightSchema);
-                const args = [`%c${match[1]}`, styles];
-
-                if (match[2]) {
-                    args.push(match[2]);
-                }
-
-                logger(...args, ...rest);
-            } else {
-                logger(...data);
-            }
-        }
-    }
-
-    // eslint-disable-next-line class-methods-use-this
-    error(...data: unknown[]): void {
-        error(...data);
-    }
-
-    // eslint-disable-next-line class-methods-use-this
-    warn(...data: unknown[]): void {
-        warn(...data);
-    }
-
-    // eslint-disable-next-line class-methods-use-this
     info(...data: unknown[]): void {
-        this.logColored(data, debug);
+        this.pinoInstance.info(data);
+    }
+
+    warn(...data: unknown[]): void {
+        this.pinoInstance.warn(data);
+    }
+
+    error(...data: unknown[]): void {
+        this.pinoInstance.error(data);
     }
 
     debug(...data: unknown[]): void {
-        this.schemaStyles ? this.logColored(data, debug) : debug(...data);
+        this.pinoInstance.debug(data);
+    }
+
+    child(bindings: Record<string, string>): LoggerService {
+        const childLogger = this.pinoInstance.child(bindings);
+
+        return new PinoDevLogger(bindings, this.colorSchema, this.defaultLightSchema, childLogger);
     }
 }

@@ -6,33 +6,42 @@ Allows you to have a color division of logs for `logger.debug`
 ## Installation
 
 ```bash
-yarn add @budarin/dev-logger
+yarn add @budarin/browser-pino-dev-logger
 ```
 
 ## Usage
 
 ```ts
-import { DevLogger, LightScheme, SchemaStyles } from '@budarin/dev-logger';
+import { PinoDevLogger, LightScheme, SchemaStyles } from '@budarin/browser-pino-dev-logger';
 
-const getStyle = (color: string): string => `color: ${color}; font-weight: bold;`;
-const schemasStyles: SchemaStyles = {
+const colorSchema: LightScheme = {
     '[APP]': {
-        light: getStyle('red'),
-        dark: getStyle('blue')
+        light: 'blue',
+        dark: 'lightblue',
     },
-     ...
+    '[DOMAIN]': {
+        light: 'red',
+        dark: 'coral',
+    },
+    '[SERVICE]': {
+        light: 'green',
+        dark: 'lime',
+    },
 };
 
+const appLogger = new PinoDevLogger({ layer: '[APP]' }, colorSchema);
+appLogger.info('Hello world!'); // [APP] Hello world! in browsers light scheme (light or dark)
 
-const logger = new DevLogger(schemasStyles);
-logger.debug('[APP]', 'Hello world!'); // [APP] Hello world! in browsers light scheme (light or dark)
+const domainLogger = appLogger.child({ layer: '[DOMAIN]' });
+domainLogger.info('Hello world!'); // [APP][DOMAIN] Hello world! in browsers light scheme (light or dark)
 
-const darkLogger = new DevLogger(schemasStyles, 'dark');
-darkLogger.debug('[APP]', 'Hello world!'); // [APP] Hello world! in dark scheme
+const darkServiceLogger = new PinoDevLogger({ layer: '[SERVICE]' }, colorSchema, 'dark');
+darkServiceLogger.info('Hello world in dark light theme!'); // [SERVICE] Hello world! in dark scheme
 
-const ordinaryLogger = new DevLogger();
-ordinaryLogger.debug('[APP]', 'Hello world!'); // [APP] Hello world! in usual not colored output
+const ordinaryLogger = new PinoDevLogger();
+ordinaryLogger.info('Hello world in default color fro current light scheme!'); // Hello world! in usual not colored output
 ```
 
 It looks like this
+
 ![Devtools console](log.png)
