@@ -97,13 +97,11 @@ export class PinoDevLogger implements LoggerService {
         this.pinoInstance =
             pinoInstance ||
             pino({
-                formatters: {
-                    level: (label) => ({ level: label.toUpperCase() }),
-                },
                 browser: {
                     serialize: false,
                     asObject: false,
                     transmit: {
+                        level: 'debug',
                         send: (level: Level, logEvent: LogEvent): void => {
                             const pinoInstanceLevel = pino.levels.values[this.pinoInstance.level];
 
