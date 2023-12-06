@@ -19,9 +19,8 @@ export type LightScheme = {
     };
 };
 
-function getLightScheme(defaultScheme: string = 'light'): LightSchemeType {
-    const darkMode =
-        'matchMedia' in globalThis ? globalThis.matchMedia('(prefers-color-scheme: dark)').matches : defaultScheme;
+function getLightScheme(): LightSchemeType {
+    const darkMode = 'matchMedia' in globalThis ? globalThis.matchMedia('(prefers-color-scheme: dark)').matches : false;
     return darkMode ? 'dark' : 'light';
 }
 
@@ -30,7 +29,7 @@ function getFormatedBindings(
     defaultLightSchema: LightSchemeType | undefined,
     bindings: pino.Bindings[],
 ): string[] {
-    const lightScheme = getLightScheme(defaultLightSchema);
+    const lightScheme = getLightScheme();
 
     const bindingMessages =
         bindings.length > 0
