@@ -29,6 +29,7 @@
     },
     "scripts": {
         "build": "sh ./tools/build.sh",
+        "patch-version": "npm version patch",
         "prepublish": "npm run build",
         "npm-publish": "npm run build && npm publish",
         "upgrade deps": "yarn upgrade-interactive --latest;"
