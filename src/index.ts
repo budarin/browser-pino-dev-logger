@@ -1,5 +1,4 @@
 import { pino, Level, LogEvent } from 'pino';
-import { CacheStore } from '@budarin/cache-store';
 
 const DEBUG = 'debug';
 const noop = (): void => {};
@@ -128,25 +127,6 @@ export class PinoDevLogger implements LoggerService {
     }
 
     // использовать для получение значения дефолтной схемы из стора
-    static async createInstance(
-        bindings: Record<string, string> = {},
-        colorSchema: LightScheme = {},
-        storeName: string = 'kv-store',
-        itemSchema: string = 'lightSchema',
-        pinoInstance: pino.Logger | undefined = undefined,
-    ) {
-        const store = new CacheStore(storeName);
-        const lightSchema = await store.getItem(itemSchema);
-
-        if ('schema' in lightSchema && typeof lightSchema.schema === 'string') {
-            if (lightSchemaTypes.includes(lightSchema.schema)) {
-                return new PinoDevLogger(bindings, colorSchema, lightSchema.schema as LightSchemeType, pinoInstance);
-            }
-        }
-
-        return new PinoDevLogger(bindings, colorSchema, undefined, pinoInstance);
-    }
-
     info(...data: unknown[]): void {
         this.pinoInstance.info(data);
     }
