@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@budarin/cache-store@^1.0.14":
+  version "1.0.14"
+  resolved "https://registry.yarnpkg.com/@budarin/cache-store/-/cache-store-1.0.14.tgz#5786d6bf028303c15389abfe0f00c0a088221a92"
+  integrity sha512-Wkv1Q58bHVT7c4FTzwmFkUIbIHE2MSUcq6OzyaPviUMuVbyJBeWNujEtt25Cr+PVsNa7cyZseY3/SU6CxS8UFQ==
+
 abort-controller@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/abort-controller/-/abort-controller-3.0.0.tgz#eaf54d53b62bae4138e809ca225c8439a6efb392"

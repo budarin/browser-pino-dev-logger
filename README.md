@@ -42,6 +42,29 @@ const ordinaryLogger = new PinoDevLogger();
 ordinaryLogger.info('Hello world in default color fro current light scheme!'); // Hello world! in usual not colored output
 ```
 
+If you need to set the default scheme stored in the Cache during logger initialization, you need to use the asynchronous static method `PinoDevLogger.createInstance`
+
+```ts
+try {
+    const appLogger = await PinoDevLogger.createInstance({ layer: '[APP]' }, colorSchema);
+
+    // [APP] Hello world! in browsers light scheme (light or dark) from Cache store
+    appLogger.info('Hello world!');
+
+    const anotherAppLogger = await PinoDevLogger.createInstance(
+        { layer: '[APP]' },
+        colorSchema,
+        'kv-store',
+        'lightSchema',
+    );
+
+    // [APP] Hello world! in light scheme (light or dark) from Cache 'kv-store' from 'lightSchema' item
+    anotherAppLogger.info('Hello world!');
+} catch (error) {
+    console.error(error);
+}
+```
+
 It looks like this
 
 ![Devtools console](log.png)

@@ -36,6 +36,7 @@
         "upgrade deps": "yarn upgrade-interactive --latest;"
     },
     "dependencies": {
+        "@budarin/cache-store": "^1.0.14",
         "pino": "^8.16.2"
     }
 }
