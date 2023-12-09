@@ -96,9 +96,10 @@ export class PinoDevLogger implements LoggerService {
         this.colorSchema = colorSchema;
         this.defaultLightSchema = defaultLightSchema;
 
-        this.pinoInstance =
-            pinoInstance ||
-            pino({
+        if (pinoInstance) {
+            this.pinoInstance = pinoInstance;
+        } else {
+            const logger = pino({
                 browser: {
                     serialize: false,
                     asObject: false,
@@ -121,7 +122,10 @@ export class PinoDevLogger implements LoggerService {
                     },
                     write: noop,
                 },
-            }).child(bindings);
+            });
+
+            this.pinoInstance = bindings ? logger.child(bindings) : logger;
+        }
 
         (this.pinoInstance as pino.Logger).level = DEBUG;
     }
