@@ -8,8 +8,8 @@
     "editor.cursorSmoothCaretAnimation": "on",
     "editor.smoothScrolling": true,
     "editor.codeActionsOnSave": {
-        "source.fixAll": true,
-        "source.organizeImports": false
+        "source.fixAll": "explicit",
+        "source.organizeImports": "never"
     },
     "editor.bracketPairColorization.enabled": true,
     "editor.guides.bracketPairs": true,
@@ -102,7 +102,6 @@
 
     // terminal
     "terminal.integrated.cursorBlinking": true,
-    "terminal.integrated.enableBell": true,
     "terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
     "terminal.integrated.minimumContrastRatio": 4.5,
     "terminal.integrated.defaultProfile.windows": "Git Bash",
@@ -114,5 +113,9 @@
         }
     },
     "terminal.integrated.scrollback": 500000,
-    "terminal.integrated.enablePersistentSessions": false
+    "terminal.integrated.enablePersistentSessions": false,
+    "accessibility.signals.terminalBell": {
+        "sound": "on"
+    },
+    "terminal.integrated.enableVisualBell": true
 }
