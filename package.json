@@ -22,7 +22,7 @@
         "url": "git+https://github.com/budarin/browser-pino-dev-logger.git"
     },
     "devDependencies": {
-        "typescript": "^5.4.2"
+        "typescript": "^5.4.3"
     },
     "publishConfig": {
         "access": "public",
