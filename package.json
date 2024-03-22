@@ -21,9 +21,6 @@
     "repository": {
         "url": "git+https://github.com/budarin/browser-pino-dev-logger.git"
     },
-    "devDependencies": {
-        "typescript": "^5.4.3"
-    },
     "publishConfig": {
         "access": "public",
         "registry": "https://registry.npmjs.org/"
@@ -37,5 +34,8 @@
     },
     "dependencies": {
         "pino": "^8.19.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.4.3"
     }
 }
