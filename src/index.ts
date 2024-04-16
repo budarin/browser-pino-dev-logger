@@ -108,7 +108,7 @@ export class PinoDevLogger implements LoggerService {
                     transmit: {
                         level: DEBUG,
                         send: (level: Level, logEvent: LogEvent): void => {
-                            const pinoInstanceLevel = pino.levels.values[this.pinoInstance.level];
+                            const pinoInstanceLevel = pino.levels.values[this.level];
 
                             if (pino.levels.values[level] >= pinoInstanceLevel) {
                                 const messages = logEvent.messages.flat();
