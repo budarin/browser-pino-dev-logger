@@ -9,6 +9,7 @@ interface LoggerService {
     error: (...data: unknown[]) => void;
     debug: (...data: unknown[]) => void;
     child: (binding: Record<string, string>) => LoggerService;
+    level: pino.Level;
 }
 
 export type LightSchemeType = 'light' | 'dark';
@@ -62,6 +63,7 @@ const logFunctions = {
     info,
     warn,
     error,
+    silent: () => {},
 };
 
 type LogFunctions = typeof logFunctions;
@@ -127,8 +129,10 @@ export class PinoDevLogger implements LoggerService {
             this.pinoInstance = bindings ? logger.child(bindings) : logger;
         }
 
-        (this.pinoInstance as pino.Logger).level = DEBUG;
+        this.level = DEBUG;
     }
+
+    level: pino.Level;
 
     // использовать для получение значения дефолтной схемы из стора
     info(...data: unknown[]): void {
