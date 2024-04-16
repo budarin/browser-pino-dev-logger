@@ -1,6 +1,6 @@
 {
     "name": "@budarin/browser-pino-dev-logger",
-    "version": "1.0.13",
+    "version": "1.0.14",
     "author": "Vadim Budarin <budarin-vv@yandex.ru>",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
