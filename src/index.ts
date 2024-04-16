@@ -88,6 +88,8 @@ export class PinoDevLogger implements LoggerService {
 
     private defaultLightSchema: LightSchemeType | undefined;
 
+    private logLevel: pino.Level = 'debug';
+
     constructor(
         bindings: Record<string, string> = {},
         colorSchema: LightScheme = {},
@@ -105,9 +107,8 @@ export class PinoDevLogger implements LoggerService {
                     serialize: false,
                     asObject: false,
                     transmit: {
-                        level: DEBUG,
                         send: (level: Level, logEvent: LogEvent): void => {
-                            const pinoInstanceLevel = pino.levels.values[this.pinoInstance.level];
+                            const pinoInstanceLevel = pino.levels.values[this.logLevel];
 
                             if (pino.levels.values[level] >= pinoInstanceLevel) {
                                 const messages = logEvent.messages.flat();
@@ -128,10 +129,11 @@ export class PinoDevLogger implements LoggerService {
             this.pinoInstance = bindings ? logger.child(bindings) : logger;
         }
 
-        this.pinoInstance.level = DEBUG;
+        this.pinoInstance.level = this.logLevel;
     }
 
     setLevel(level: pino.Level): void {
+        this.logLevel = level;
         this.pinoInstance.level = level;
     }
 
