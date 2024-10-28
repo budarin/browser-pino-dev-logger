@@ -33,9 +33,9 @@
         "upgrade deps": "yarn upgrade-interactive --latest;"
     },
     "dependencies": {
-        "pino": "^8.19.0"
+        "pino": "^9.5.0"
     },
     "devDependencies": {
-        "typescript": "^5.4.3"
+        "typescript": "^5.6.3"
     }
 }
