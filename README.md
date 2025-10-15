@@ -44,26 +44,26 @@ ordinaryLogger.info('Hello world in default color fro current light scheme!'); /
 
 ## Disable/Enable Loggers
 
-You can disable or enable specific loggers or all loggers at once using the global `window.logger` object in console while debugging:
+You can disable or enable specific loggers or all loggers at once using the global `logger` object in console while debugging:
 
 ```ts
 // Disable specific logger
-window.logger.disable.APP();        // Disables APP logger
-window.logger.disable.DOMAIN();     // Disables DOMAIN logger
-window.logger.disable.SERVICE(); // Disables SERVICE logger
+logger.disable.APP();        // Disables APP logger
+logger.disable.DOMAIN();     // Disables DOMAIN logger
+logger.disable.SERVICE(); // Disables SERVICE logger
 
 // Enable specific logger
-window.logger.enable.APP();         // Enables APP logger
-window.logger.enable.DOMAIN();      // Enables DOMAIN logger
+logger.enable.APP();         // Enables APP logger
+logger.enable.DOMAIN();      // Enables DOMAIN logger
 
 // Disable all loggers
-window.logger.disable.all();
+logger.disable.all();
 
 // Enable all loggers
-window.logger.enable.all();
+logger.enable.all();
 ```
 
-**Note:** Logger names are automatically cleaned from spaces and brackets. So if you create a logger with `{ layer: '[ APP ]' }`, you can disable it with `window.logger.disable.APP()`.
+**Note:** Logger names are automatically cleaned from spaces and brackets. So if you create a logger with `{ layer: '[ APP ]' }`, you can disable it with `logger.disable.APP()`.
 
 It looks like this
 
