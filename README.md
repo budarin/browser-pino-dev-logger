@@ -42,6 +42,29 @@ const ordinaryLogger = new PinoDevLogger();
 ordinaryLogger.info('Hello world in default color fro current light scheme!'); // Hello world! in usual not colored output
 ```
 
+## Disable/Enable Loggers
+
+You can disable or enable specific loggers or all loggers at once using the global `window.logger` object in console while debugging:
+
+```ts
+// Disable specific logger
+window.logger.disable.APP();        // Disables APP logger
+window.logger.disable.DOMAIN();     // Disables DOMAIN logger
+window.logger.disable.SERVICE(); // Disables SERVICE logger
+
+// Enable specific logger
+window.logger.enable.APP();         // Enables APP logger
+window.logger.enable.DOMAIN();      // Enables DOMAIN logger
+
+// Disable all loggers
+window.logger.disable.all();
+
+// Enable all loggers
+window.logger.enable.all();
+```
+
+**Note:** Logger names are automatically cleaned from spaces and brackets. So if you create a logger with `{ layer: '[ APP ]' }`, you can disable it with `window.logger.disable.APP()`.
+
 It looks like this
 
 ![Devtools console](log.png)

@@ -1,4 +1,4 @@
-import { pino, Level, LogEvent } from 'pino';
+import pino,{  Level, LogEvent } from 'pino';
 
 const DEBUG = 'debug';
 const noop = (): void => {};
@@ -10,6 +10,8 @@ interface LoggerService {
     debug: (...data: unknown[]) => void;
     child: (binding: Record<string, string>) => LoggerService;
     setLevel(level: pino.Level): void;
+    disable(): void;
+    enable(): void;
 }
 
 export type LightSchemeType = 'light' | 'dark';
@@ -18,6 +20,53 @@ export type LightScheme = {
         light: string;
         dark: string;
     };
+};
+
+// Глобальный реестр логгеров
+const loggerRegistry = new Map<string, PinoDevLogger>();
+
+// Proxy для window.logger с динамическими свойствами
+const createLoggerProxy = () => {
+    return new Proxy({}, {
+        get(target, prop) {
+            if (prop === 'disable' || prop === 'enable') {
+                return new Proxy({}, {
+                    get(disableTarget, loggerName) {
+                        // Обработка специальных методов all()
+                        if (loggerName === 'all') {
+                            return prop === 'disable'
+                                ? () => {
+                                    // Отключаем все логгеры в реестре
+                                    loggerRegistry.forEach(logger => logger.disable());
+                                }
+                                : () => {
+                                    // Включаем все логгеры в реестре
+                                    loggerRegistry.forEach(logger => logger.enable());
+                                };
+                        }
+
+                        const logger = loggerRegistry.get(loggerName as string);
+                        if (logger) {
+                            return prop === 'disable'
+                                ? () => logger.disable()
+                                : () => logger.enable();
+                        }
+
+                        // Если логгер не найден, возвращаем noop функцию вместо undefined
+                        return noop;
+                    },
+                    ownKeys() {
+                        // Добавляем 'all' к списку доступных методов
+                        return ['all', ...Array.from(loggerRegistry.keys())];
+                    },
+                    has(target, prop) {
+                        return prop === 'all' || loggerRegistry.has(prop as string);
+                    }
+                });
+            }
+            return undefined;
+        }
+    });
 };
 
 function getLightScheme(): LightSchemeType {
@@ -90,6 +139,10 @@ export class PinoDevLogger implements LoggerService {
 
     private logLevel: pino.Level = 'debug';
 
+    private isEnabled: boolean = true;
+
+    private loggerName?: string;
+
     constructor(
         bindings: Record<string, string> = {},
         colorSchema: LightScheme = {},
@@ -130,6 +183,11 @@ export class PinoDevLogger implements LoggerService {
         }
 
         this.pinoInstance.level = this.logLevel;
+
+        // Создаем глобальный logger в window только для корневого логгера
+        if (typeof window !== 'undefined' && !pinoInstance) {
+            (window as any).logger = createLoggerProxy();
+        }
     }
 
     setLevel(level: pino.Level): void {
@@ -137,26 +195,52 @@ export class PinoDevLogger implements LoggerService {
         this.pinoInstance.level = level;
     }
 
+    disable(): void {
+        this.isEnabled = false;
+    }
+
+    enable(): void {
+        this.isEnabled = true;
+    }
+
     // использовать для получение значения дефолтной схемы из стора
     info(...data: unknown[]): void {
-        this.pinoInstance.info(data);
+        if (this.isEnabled) {
+            this.pinoInstance.info(data);
+        }
     }
 
     warn(...data: unknown[]): void {
-        this.pinoInstance.warn(data);
+        if (this.isEnabled) {
+            this.pinoInstance.warn(data);
+        }
     }
 
     error(...data: unknown[]): void {
-        this.pinoInstance.error(data);
+        if (this.isEnabled) {
+            this.pinoInstance.error(data);
+        }
     }
 
     debug(...data: unknown[]): void {
-        this.pinoInstance.debug(data);
+        if (this.isEnabled) {
+            this.pinoInstance.debug(data);
+        }
     }
 
     child(bindings: Record<string, string>): LoggerService {
         const childLogger = this.pinoInstance.child(bindings);
 
-        return new PinoDevLogger(bindings, this.colorSchema, this.defaultLightSchema, childLogger);
+        // Генерируем имя логгера из первого значения bindings, убираем пробелы и скобки
+        const rawLoggerName = Object.values(bindings)[0] || 'default';
+        const loggerName = rawLoggerName.replace(/[\[\]\s]/g, '');
+
+        const child = new PinoDevLogger(bindings, this.colorSchema, this.defaultLightSchema, childLogger);
+        child.loggerName = loggerName;
+
+        // Регистрируем в глобальном реестре
+        loggerRegistry.set(loggerName, child);
+
+        return child;
     }
 }
