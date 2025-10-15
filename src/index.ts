@@ -131,15 +131,10 @@ function logMessage(level: string, binds: string[], messages: string[]): void {
 const lightSchemaTypes = ['light', 'dark'];
 export class PinoDevLogger implements LoggerService {
     private pinoInstance: pino.Logger;
-
     private colorSchema: LightScheme;
-
     private defaultLightSchema: LightSchemeType | undefined;
-
     private logLevel: pino.Level = 'debug';
-
     private isEnabled: boolean = true;
-
     private loggerName?: string;
 
     constructor(
