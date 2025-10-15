@@ -1,6 +1,5 @@
-import pino,{  Level, LogEvent } from 'pino';
+import pino, { type Level, type LogEvent } from 'pino';
 
-const DEBUG = 'debug';
 const noop = (): void => {};
 
 interface LoggerService {
@@ -28,10 +27,10 @@ const loggerRegistry = new Map<string, PinoDevLogger>();
 // Proxy для window.logger с динамическими свойствами
 const createLoggerProxy = () => {
     return new Proxy({}, {
-        get(target, prop) {
+        get(_, prop) {
             if (prop === 'disable' || prop === 'enable') {
                 return new Proxy({}, {
-                    get(disableTarget, loggerName) {
+                    get(_, loggerName) {
                         // Обработка специальных методов all()
                         if (loggerName === 'all') {
                             return prop === 'disable'
@@ -59,7 +58,7 @@ const createLoggerProxy = () => {
                         // Добавляем 'all' к списку доступных методов
                         return ['all', ...Array.from(loggerRegistry.keys())];
                     },
-                    has(target, prop) {
+                    has(_, prop) {
                         return prop === 'all' || loggerRegistry.has(prop as string);
                     }
                 });
@@ -71,7 +70,7 @@ const createLoggerProxy = () => {
 
 function getLightScheme(): LightSchemeType {
     const darkMode = 'matchMedia' in globalThis ? globalThis.matchMedia('(prefers-color-scheme: dark)').matches : false;
-    return darkMode ? 'dark' : 'light';
+    return darkMode ? (lightSchemaTypes[1] as LightSchemeType) : (lightSchemaTypes[0] as LightSchemeType);
 }
 
 function getFormatedBindings(
@@ -163,7 +162,7 @@ export class PinoDevLogger implements LoggerService {
                         send: (level: Level, logEvent: LogEvent): void => {
                             const pinoInstanceLevel = pino.levels.values[this.logLevel];
 
-                            if (pino.levels.values[level] >= pinoInstanceLevel) {
+                            if (pino.levels.values[level] && pinoInstanceLevel &&pino.levels.values[level] >= pinoInstanceLevel) {
                                 const messages = logEvent.messages.flat();
                                 const binds = getFormatedBindings(
                                     this.colorSchema,
@@ -201,6 +200,10 @@ export class PinoDevLogger implements LoggerService {
 
     enable(): void {
         this.isEnabled = true;
+    }
+
+    getLoggerName(): string | undefined {
+        return this.loggerName;
     }
 
     // использовать для получение значения дефолтной схемы из стора
