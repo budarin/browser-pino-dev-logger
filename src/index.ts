@@ -9,8 +9,6 @@ interface LoggerService {
     debug: (...data: unknown[]) => void;
     child: (binding: Record<string, string>) => LoggerService;
     setLevel(level: pino.Level): void;
-    disable(): void;
-    enable(): void;
 }
 
 export type LightSchemeType = 'light' | 'dark';
